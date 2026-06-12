@@ -1,0 +1,31 @@
+using UnityEngine;
+
+public class Minesweeper : MonoBehaviour
+{
+
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
+
+public enum CellState
+{
+    None = 0,
+    One = 1,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
+    Six = 6,
+    Seven = 7,
+    Eight = 8,
+
+    Mine = -1,
+}

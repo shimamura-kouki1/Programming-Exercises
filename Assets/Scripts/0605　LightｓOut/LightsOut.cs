@@ -1,16 +1,17 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class LightsOut : MonoBehaviour
 {
-    [SerializeField] private int _col = 5;//行数
-    [SerializeField] private int _row = 5;//列数
+    [SerializeField] private int _col = 5;//列数
+    [SerializeField] private int _row = 5;//行数
     private Image[,] _images;//セルのイメージ
     private bool[,] _isBlack;//セルが黒かどうか
 
     [SerializeField] private int _shuffle = 20;//シャッフル回数
 
-    private int _count = 0;//クリック回数
+    private int _clickCount = 0;//クリック回数
     private float _startTime;//ゲーム開始時間
     private Vector2Int[] _answer;//正解手順配列
 
@@ -19,7 +20,6 @@ public class LightsOut : MonoBehaviour
         _images = new Image[_row, _col];
         _isBlack = new bool[_row, _col];
         _answer = new Vector2Int[_shuffle];
-        _startTime = Time.time;
 
         //========================--セルの生成--========================
         for (var r = 0; r < _row; r++)
@@ -47,6 +47,7 @@ public class LightsOut : MonoBehaviour
         }
         Shuffle();
         Answer();
+        _startTime = Time.time;
     }
 
     /// <summary>
@@ -56,18 +57,14 @@ public class LightsOut : MonoBehaviour
     /// <param name="col"></param>
     private void OnCellClick(int row, int col)
     {
-        _count++;
+        _clickCount++;
 
-        Toggle(row, col);
-        Toggle(row - 1, col);
-        Toggle(row + 1, col);
-        Toggle(row, col - 1);
-        Toggle(row, col + 1);
+        PushCell(row, col);
 
         if (IsClear())
         {
             float elapsedTime = Time.time - _startTime;
-            Debug.Log($"クリア！{_count}回クリックしました。クリア時間: {elapsedTime}秒");
+            Debug.Log($"クリア！{_clickCount}回クリックしました。クリア時間: {elapsedTime}秒");
         }
     }
 
@@ -115,11 +112,8 @@ public class LightsOut : MonoBehaviour
         {
             int row = Random.Range(0, _row);
             int col = Random.Range(0, _col);
-            Toggle(row, col);
-            Toggle(row - 1, col);
-            Toggle(row + 1, col);
-            Toggle(row, col - 1);
-            Toggle(row, col + 1);
+
+            PushCell(row, col);
 
             _answer[r] = new Vector2Int(row, col);//シャッフルの手順を記録
         }
@@ -135,5 +129,19 @@ public class LightsOut : MonoBehaviour
         {
             Debug.Log($"Answer: ({_answer[i].x}, {_answer[i].y})");
         }
+    }
+
+    /// <summary>
+    /// 押したセルの状態を切り替える範囲乗せる確認
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
+    private void PushCell(int row, int col)
+    {
+        Toggle(row, col);
+        Toggle(row - 1, col);
+        Toggle(row + 1, col);
+        Toggle(row, col - 1);
+        Toggle(row, col + 1);
     }
 }

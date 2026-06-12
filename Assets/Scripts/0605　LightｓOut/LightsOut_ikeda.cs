@@ -91,6 +91,7 @@ public class Test : MonoBehaviour, IPointerClickHandler
             ColorChange(image);
         }
     }
+
     private bool FindCell(GameObject target, int deltaRow, int deltaColumn, out GameObject result)//クリックしたセルの周囲にセルがあるかチェックする関数
     {
         int targetRow = 0, targetCol = 0;
