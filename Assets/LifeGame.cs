@@ -53,7 +53,33 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
 
     private void OnNext()
     {
+        Life_CellState[,] nextStates = new Life_CellState[_rows, _columns];
 
+        for (int r = 0; r < _rows; r++)
+        {
+            for (int c = 0; c < _columns; c++)
+            {
+                int aliveCount = CountAliveNeighdors(r, c);
+
+                bool IsAlive = _cells[r, c].state == Life_CellState.Alive;
+
+                if (IsAlive)
+                {
+                    nextStates[r, c] = (aliveCount == 2 || aliveCount == 3) ? Life_CellState.Alive : Life_CellState.Dead;
+                }
+                else
+                {
+                    nextStates[r, c] = (aliveCount == 3) ? Life_CellState.Alive : Life_CellState.Dead;
+                }
+            }
+        }
+        for (int r = 0; r < _rows; r++)
+        {
+            for (int c = 0; c < _columns; c++)
+            {
+                _cells[r, c].state = nextStates[r, c];
+            }
+        }
     }
 
     /// <summary>
@@ -76,9 +102,9 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
                 int nc = col + dc;
 
                 if (nr < 0 || nr >= _rows) continue;
-                if (nc < 0 || nc >= _columns)continue;
+                if (nc < 0 || nc >= _columns) continue;
 
-                if (_cells[nr,nc].state == Life_CellState.Alive)
+                if (_cells[nr, nc].state == Life_CellState.Alive)
                 {
                     count++;
                 }
