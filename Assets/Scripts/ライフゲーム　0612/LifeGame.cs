@@ -11,7 +11,16 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
     [SerializeField] private GridLayoutGroup _gridLayoutGroup = null;
     [SerializeField] private LifeCell _cellPrefab = null;
 
+    [SerializeField]
+    private float _duration = 1.0F; // セルを更新する時間間隔（秒単位）
+    private bool _isPlaying = false; // 時間経過の更新が実行中かどうか
+
+    [SerializeField]
+    [Multiline]
+    private string _data = "";
+
     private LifeCell[,] _cells;
+    private float _timer = 0.0f;
 
     void Start()
     {
@@ -24,11 +33,11 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
         {
             for (var c = 0; c < _columns; c++)
             {
-                var cell = Instantiate(_cellPrefab);
-                cell.transform.SetParent(parent);
+                var cell = Instantiate(_cellPrefab,parent,false);
                 _cells[r, c] = cell;
             }
         }
+        LoadData();
     }
 
     private void Update()
@@ -36,10 +45,27 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
         var keyboard = Keyboard.current;
         if (keyboard == null) return;
 
-        if (keyboard.rightArrowKey.wasPressedThisFrame)
+        if (keyboard.spaceKey.wasPressedThisFrame)
+        {
+            _isPlaying = !_isPlaying;
+            _timer = 0.0f;
+        }
+        if (_isPlaying)
+        {
+            _timer += Time.deltaTime;
+
+            if (_timer >= _duration)
+            {
+                _timer = 0.0f;
+                OnNext();
+            }
+        }
+
+        if (!_isPlaying && keyboard.rightArrowKey.wasPressedThisFrame)
         {
             OnNext();
         }
+
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -59,11 +85,11 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
         {
             for (int c = 0; c < _columns; c++)
             {
-                int aliveCount = CountAliveNeighdors(r, c);
+                int aliveCount = CountAliveNeighbors(r, c);
 
-                bool IsAlive = _cells[r, c].state == Life_CellState.Alive;
+                bool isAlive = _cells[r, c].state == Life_CellState.Alive;
 
-                if (IsAlive)
+                if (isAlive)
                 {
                     nextStates[r, c] = (aliveCount == 2 || aliveCount == 3) ? Life_CellState.Alive : Life_CellState.Dead;
                 }
@@ -88,7 +114,7 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
     /// <param name="row"></param>
     /// <param name="col"></param>
     /// <returns></returns>
-    private int CountAliveNeighdors(int row, int col)
+    private int CountAliveNeighbors(int row, int col)
     {
         int count = 0;
 
@@ -111,5 +137,29 @@ public class LifeGame : MonoBehaviour, IPointerClickHandler
             }
         }
         return count;
+    }
+
+    private void LoadData()
+    {
+        string[] lines = _data.Split('\n');
+
+        for (int r = 0; r < _rows; r++)
+        {
+            // 行が足りなければ何もしない
+            if (r >= lines.Length)
+                continue;
+
+            for (int c = 0; c < _columns; c++)
+            {
+                // 列が足りなければ何もしない
+                if (c >= lines[r].Length)
+                    continue;
+
+                char ch = lines[r][c];
+
+                _cells[r, c].state =
+                    (ch == '1') ? Life_CellState.Alive : Life_CellState.Dead;
+            }
+        }
     }
 }
